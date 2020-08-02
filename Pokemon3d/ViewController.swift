@@ -22,6 +22,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Show statistics such as fps and timing information
         sceneView.showsStatistics = true
+        
+        sceneView.autoenablesDefaultLighting = true
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -32,7 +34,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         if let imageToTrack = ARReferenceImage.referenceImages(inGroupNamed: "Pokemon Cards", bundle: Bundle.main) {
             configuration.trackingImages = imageToTrack
-            configuration.maximumNumberOfTrackedImages = 1
+            configuration.maximumNumberOfTrackedImages = 2
             print("image added")
         }
 
@@ -54,11 +56,37 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         if let imageAnchor = anchor as? ARImageAnchor {
             let plane = SCNPlane(width: imageAnchor.referenceImage.physicalSize.width, height: imageAnchor.referenceImage.physicalSize.height)
-            
+            plane.firstMaterial?.diffuse.contents = UIColor(white: 1.0, alpha: 0.75)
             let planeNode = SCNNode(geometry: plane)
+            planeNode.eulerAngles.x = -.pi/2
+            
             node.addChildNode(planeNode)
+            
+            if imageAnchor.referenceImage.name == "oddish" {
+                addPokemon(at: planeNode, "oddish")
+            } else if imageAnchor.referenceImage.name == "eevee" {
+                addPokemon(at: planeNode, "eevee")
+            }
+            
+//            if let pokeScene = SCNScene(named: "art.scnassets/oddish.scn") {
+//                if let pokeNode = pokeScene.rootNode.childNodes.first {
+//                    pokeNode.eulerAngles.x = .pi/2
+//                    planeNode.addChildNode(pokeNode)
+//                }
+//            }
         }
         
         return node
+    }
+    
+    func addPokemon(at node: SCNNode, _ pokemon: String) {
+        let name = "art.scnassets/" + pokemon + ".scn"
+        
+        if let pokeScene = SCNScene(named: name) {
+            if let pokeNode = pokeScene.rootNode.childNodes.first {
+                pokeNode.eulerAngles.x = .pi/2
+                node.addChildNode(pokeNode)
+            }
+        }
     }
 }
